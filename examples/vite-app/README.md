@@ -1,6 +1,6 @@
 # Browser example: Vite
 
-![The example app: highlighted SQL, validation and formatted output](screenshot.png)
+![The example app: typing a query with live highlighting and errors, formatting it, the AST, byte offsets on non-ASCII text, a syntax error, and the slim build](demo.gif)
 
 A small Vite + TypeScript app that uses `@clickhouse/wasm-parser` in the
 browser. It is both an integration example and an in-browser playground:

@@ -139,6 +139,8 @@ documented with the module itself in ClickHouse's
 
 ## Examples
 
+![The browser example: live highlighting and errors while typing, formatting, the AST, and the slim build](examples/vite-app/demo.gif)
+
 [`examples/vite-app`](examples/vite-app) is a Vite + TypeScript app that uses
 the package in the browser. It has an editor with parser-accurate highlighting,
 live syntax errors with the expected tokens, formatting, the AST and its round
