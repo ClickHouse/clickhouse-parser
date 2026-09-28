@@ -1,0 +1,61 @@
+{
+  "name": "@clickhouse/wasm-parser",
+  "version": "0.1.0",
+  "description": "Experimental ClickHouse SQL parser as WebAssembly. The JS API is unstable.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClickHouse/clickhouse-parser.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./dist/full-node.d.ts",
+        "default": "./dist/full-node.js"
+      },
+      "browser": {
+        "types": "./dist/full-browser.d.ts",
+        "default": "./dist/full-browser.js"
+      },
+      "default": {
+        "types": "./dist/full-browser.d.ts",
+        "default": "./dist/full-browser.js"
+      }
+    },
+    "./slim": {
+      "node": {
+        "types": "./dist/slim-node.d.ts",
+        "default": "./dist/slim-node.js"
+      },
+      "browser": {
+        "types": "./dist/slim-browser.d.ts",
+        "default": "./dist/slim-browser.js"
+      },
+      "default": {
+        "types": "./dist/slim-browser.d.ts",
+        "default": "./dist/slim-browser.js"
+      }
+    },
+    "./wasm/*.wasm": "./wasm/*.wasm"
+  },
+  "types": "./dist/full-node.d.ts",
+  "files": [
+    "dist",
+    "wasm"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "typecheck": "npm run build && tsc",
+    "test": "npm run build && node test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "^7.0.2"
+  }
+}
