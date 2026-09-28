@@ -1,0 +1,13 @@
+{
+  "commit": "f573c01caeac184c844185ec482c97306ba19bb7",
+  "files": {
+    "parser.wasm": {
+      "size": 2102966,
+      "sha256": "9e612f89ead2c8195ff03ac8f775b10ce61503a13700fb87a19474d120a36566"
+    },
+    "parser-no-formatting-no-dcl.wasm": {
+      "size": 831859,
+      "sha256": "06feccdde82e9b27ff1db645c3668b62704f39935baccca44098a08d20668c47"
+    }
+  }
+}
