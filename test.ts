@@ -130,6 +130,7 @@ check('slim parse before init throws', throwsInitHint(() => SlimParser.parse('SE
     check('package does not contain the TypeScript sources', !files.some(f => f.startsWith('src/')));
     check('package does not contain tests', !files.includes('test.ts'));
     check('package does not contain the playground', !files.some(f => f.startsWith('playground/')));
+    check('package does not contain the examples', !files.some(f => f.startsWith('examples/')));
 }
 
 const fullWasm = pathToFileURL(join(wasmDir, 'parser.wasm'));

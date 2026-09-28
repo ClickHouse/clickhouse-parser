@@ -10,6 +10,7 @@ highlighting (also for incomplete SQL), the AST as JSON, and formatting.
 - [Install](#install)
 - [Usage](#usage)
 - [API](#api)
+- [Examples](#examples)
 - [Playground](#playground)
 - [Development](#development)
 - [Updating the WebAssembly modules](#updating-the-webassembly-modules)
@@ -124,12 +125,36 @@ Behavior to know:
   and `error.begin` / `end` count UTF-8 bytes, end exclusive. They match
   JavaScript string indices only for ASCII; convert before slicing a string
   with non-ASCII characters in it.
+- **AST JSON can fail on nested queries.** For some ordinary nested queries,
+  such as `x IN (SELECT …)` or a subquery inside a subquery, the query parses
+  but `ast` is `null` and `ast_error` says "Stack size too large". Highlighting,
+  errors and formatting are unaffected. The cause is the module's stack size,
+  which is set by its build in ClickHouse.
 - **URLs:** a string without a scheme (such as `/assets/parser.wasm`) is
   fetched. In Node, a filesystem path must be passed as a `file:` URL.
 
 The JSON the parser produces (AST node shapes and highlight types) is
 documented with the module itself in ClickHouse's
 [`utils/wasm-parser` README](https://github.com/ClickHouse/ClickHouse/tree/master/utils/wasm-parser#the-json-api).
+
+## Examples
+
+[`examples/vite-app`](examples/vite-app) is a Vite + TypeScript app that uses
+the package in the browser. It has an editor with parser-accurate highlighting,
+live syntax errors with the expected tokens, formatting, the AST and its round
+trip, and a switch between the full and slim builds. It is also the reference
+for integrating the package into a web app, including the byte-offset
+conversion an editor needs.
+
+```bash
+npm install
+cd examples/vite-app
+npm install
+npm run dev
+```
+
+CI builds it and loads it in headless Chrome to check that the parser runs in a
+real browser.
 
 ## Playground
 
@@ -217,10 +242,11 @@ Layout:
 | `test.ts` | The test suite. It runs against `dist/`, so it tests what actually ships. |
 | `scripts/update-wasm.ts` | Replaces the modules in `wasm/` and rewrites the manifest. |
 | `playground/` | The REPL. |
+| `examples/vite-app/` | The browser example, with a headless Chrome smoke test (`npm test` there). |
 
 CI (`.github/workflows/test.yml`) runs `npm ci`, `npm run typecheck` and
-`npm test` on Node 22.18, the latest 22 and 24 for every pull request and push
-to `main`.
+`npm test` on Node 22.18, the latest 22 and 24, and builds and smoke-tests the
+browser example, for every pull request and push to `main`.
 
 ## Updating the WebAssembly modules
 

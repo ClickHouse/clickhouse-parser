@@ -21,7 +21,9 @@ export interface ParseError
 
 export interface ParseResult
 {
+    /** The tree as JSON. Absent from a build without AST JSON; `null` when `ast_error` is set. */
     ast?: unknown;
+    /** Set when the query parsed but the module could not serialize its tree. */
     ast_error?: string;
     highlights?: Highlight[];
     error?: ParseError;

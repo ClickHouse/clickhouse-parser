@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClickHouse WASM Parser</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>ClickHouse WASM Parser</h1>
+        <p class="subtitle">
+          ClickHouse's own SQL parser, running in your browser. Nothing is sent to a server.
+        </p>
+      </div>
+      <div class="controls">
+        <label>
+          Build
+          <select id="build">
+            <option value="full">Full (parse, format, AST)</option>
+            <option value="slim">Slim (parse and highlight only)</option>
+          </select>
+        </label>
+        <label>
+          Example
+          <select id="sample"></select>
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section class="editor-pane">
+        <div class="pane-header">
+          <h2>SQL</h2>
+          <span id="status" class="status">Loading…</span>
+        </div>
+        <div class="editor">
+          <pre id="overlay" aria-hidden="true"></pre>
+          <textarea id="sql" spellcheck="false" autocapitalize="off" autocomplete="off"
+            aria-label="SQL query"></textarea>
+        </div>
+        <div id="diagnostics" class="diagnostics" role="status" aria-live="polite"></div>
+        <div id="features" class="features"></div>
+      </section>
+
+      <section class="output-pane">
+        <div class="tabs" role="tablist">
+          <button role="tab" data-tab="format" aria-selected="true">Format</button>
+          <button role="tab" data-tab="ast" aria-selected="false">AST</button>
+          <button role="tab" data-tab="highlights" aria-selected="false">Highlights</button>
+        </div>
+
+        <div data-panel="format" class="panel">
+          <div class="panel-actions">
+            <label class="toggle"><input type="checkbox" id="one-line" /> One line</label>
+            <button id="apply-format" type="button">Replace the query with this</button>
+          </div>
+          <pre id="formatted" class="code"></pre>
+        </div>
+
+        <div data-panel="ast" class="panel" hidden>
+          <div class="panel-actions">
+            <span class="hint">SQL → AST JSON → <code>formatJson</code> → SQL</span>
+          </div>
+          <pre id="roundtrip" class="code small"></pre>
+          <pre id="ast" class="code"></pre>
+        </div>
+
+        <div data-panel="highlights" class="panel" hidden>
+          <div class="panel-actions">
+            <span class="hint">Offsets are UTF-8 bytes, not string indices.</span>
+          </div>
+          <table class="tokens">
+            <thead><tr><th>Bytes</th><th>Type</th><th>Text</th></tr></thead>
+            <tbody id="tokens"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

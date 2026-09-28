@@ -1,0 +1,19 @@
+{
+  "name": "wasm-parser-vite-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "node smoke.ts"
+  },
+  "dependencies": {
+    "@clickhouse/wasm-parser": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}
