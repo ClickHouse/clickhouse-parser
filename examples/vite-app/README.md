@@ -59,8 +59,7 @@ const result = Parser.parse(sql);             // synchronous from here on
 
 ## Known limitation
 
-For some ordinary nested queries, such as `x IN (SELECT …)` or a subquery
-inside a subquery, the module parses the query but cannot serialize its AST
-(`ast` is `null` and `ast_error` says "Stack size too large"). Highlighting,
-errors and formatting still work. The AST tab shows the reason when it happens.
-The cause is the module's stack size, set by its build in ClickHouse.
+A very deep query, past about 35 terms of `+` or 9 nested subqueries, parses
+but its AST cannot be serialized (`ast` is `null` and `ast_error` says "Stack
+size too large"). Highlighting, errors and formatting still work. The AST tab
+shows the reason when it happens.

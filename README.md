@@ -125,11 +125,10 @@ Behavior to know:
   and `error.begin` / `end` count UTF-8 bytes, end exclusive. They match
   JavaScript string indices only for ASCII; convert before slicing a string
   with non-ASCII characters in it.
-- **AST JSON can fail on nested queries.** For some ordinary nested queries,
-  such as `x IN (SELECT …)` or a subquery inside a subquery, the query parses
-  but `ast` is `null` and `ast_error` says "Stack size too large". Highlighting,
-  errors and formatting are unaffected. The cause is the module's stack size,
-  which is set by its build in ClickHouse.
+- **AST JSON has a depth limit.** A very deep tree, past about 35 terms of
+  `+` or 9 nested subqueries, still parses, but `ast` is `null` and
+  `ast_error` says "Stack size too large". Highlighting, errors and
+  formatting are unaffected.
 - **URLs:** a string without a scheme (such as `/assets/parser.wasm`) is
   fetched. In Node, a filesystem path must be passed as a `file:` URL.
 
