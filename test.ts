@@ -175,6 +175,68 @@ check('full build has DCL', Parser.features.dcl === true);
     check('formatJson malformed JSON is an error', typeof result.error?.message === 'string');
 }
 
+// Nested queries. With wasm-ld's default 64 KiB stack (ClickHouse before 2cc06a1, see
+// ClickHouse/ClickHouse#122916), these had a null `ast` with "Stack size too large", and 51 or
+// more nested parentheses trapped the instance for good.
+const sum = (n: number) => `SELECT ${Array.from({ length: n }, (_, i) => `revenue_${i + 1}`).join(' + ')} AS total FROM sales`;
+const ifs = (n: number) => `SELECT ${'if(x = 0, 0, '.repeat(n)}x${')'.repeat(n)} FROM t`;
+const derived = (n: number) =>
+{
+    let sql = 'SELECT id FROM t0';
+    for (let i = 1; i <= n; ++i)
+        sql = `SELECT id FROM (${sql}) AS s${i} WHERE id > ${i}`;
+    return sql;
+};
+const parens = (n: number) => `SELECT ${'('.repeat(n)}1${')'.repeat(n)}`;
+const subqueries = (n: number) => `SELECT * FROM ${'(SELECT * FROM '.repeat(n)}t${')'.repeat(n)}`;
+const chain = (n: number) => `SELECT ${Array(n).fill('1').join(' + ')}`;
+
+/** Runs `fn`, turning a trap (which would end the whole run) into a failed check. */
+function survives<T>(fn: () => T): T | undefined
+{
+    try
+    {
+        return fn();
+    }
+    catch (error)
+    {
+        console.log(`trapped: ${error}`);
+        return undefined;
+    }
+}
+
+for (const [name, sql] of [
+    ['IN subquery', 'select * from t where x in (select y from u)'],
+    ['IN subquery with a filter', "SELECT * FROM orders WHERE user_id IN (SELECT id FROM users WHERE country = 'PT')"],
+    ['subquery in a subquery', 'SELECT * FROM (SELECT * FROM (SELECT number FROM numbers(10)))'],
+    ['CTE', 'with top as (select user_id, sum(amount) as total from orders group by user_id) select user_id from top'],
+    ['a sum of 30 columns', sum(30)],
+    ['25 nested if', ifs(25)],
+    ['8 nested derived tables', derived(8)],
+    ['a chain of 35 terms', chain(35)],
+    ['9 nested subqueries', subqueries(9)],
+] as const)
+{
+    const result = survives(() => Parser.parse(sql));
+    check(`${name} has an ast`, !!result?.ast && result.ast_error === undefined);
+    const back = survives(() => Parser.formatJson(result?.ast, { oneLine: true }));
+    check(`${name} round-trips through formatJson`,
+        back?.sql !== undefined && back.sql === Parser.format(sql, { oneLine: true }).sql);
+}
+
+{
+    // Deeper than the module's stack allows for AST JSON: the query still parses, the tree comes
+    // back null with the reason, and the instance keeps working.
+    const result = survives(() => Parser.parse(chain(450)));
+    check('a chain of 450 terms parses with a null ast and the reason',
+        result?.error === undefined && result?.ast === null && /Stack size too large/.test(result.ast_error ?? ''));
+    check('190 nested parentheses parse', survives(() => Parser.parse(parens(190)))?.error === undefined);
+    check('90 nested subqueries parse', survives(() => Parser.parse(subqueries(90)))?.error === undefined);
+    check('100000 nested parentheses are a depth error',
+        /Maximum parse depth/.test(survives(() => Parser.parse(parens(100000)))?.error?.message ?? ''));
+    check('parse works after the deep queries', !!survives(() => Parser.parse('SELECT 1 + 2'))?.ast);
+}
+
 await SlimParser.init();
 check('slim build has no formatting', SlimParser.features.format === false);
 check('slim build has no AST JSON', SlimParser.features.astJson === false);
@@ -198,6 +260,12 @@ check('slim build has no DCL', SlimParser.features.dcl === false);
     check(
         'slim formatJson reports missing build support',
         result.sql === undefined && result.error?.message === 'format is not in this build');
+}
+
+{
+    check('slim parses 190 nested parentheses', survives(() => SlimParser.parse(parens(190)))?.error === undefined);
+    check('slim parses 90 nested subqueries', survives(() => SlimParser.parse(subqueries(90)))?.error === undefined);
+    check('slim parse works after the deep queries', survives(() => SlimParser.parse('SELECT 1'))?.error === undefined);
 }
 
 {
